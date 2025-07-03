@@ -13,11 +13,11 @@ function App() {
     <SettingsProvider>
       <Router>
         <div className="min-h-screen bg-black flex flex-col relative overflow-hidden">
-          {/* Animated background */}
+          {/* Static background gradients */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-purple-500/10"></div>
           
-          {/* Canvas Background Animation */}
+          {/* Canvas Background Animation - positioned between static bg and content */}
           <CanvasBackground />
           
           <div className="relative z-10 flex flex-col min-h-screen">

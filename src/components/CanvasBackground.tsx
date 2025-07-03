@@ -38,10 +38,10 @@ const CanvasBackground = () => {
       constructor(canvasWidth: number, canvasHeight: number) {
         this.x = Math.random() * canvasWidth;
         this.y = Math.random() * canvasHeight;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.radius = Math.random() * 2 + 1;
-        this.opacity = Math.random() * 0.5 + 0.2;
+        this.vx = (Math.random() - 0.5) * 1;
+        this.vy = (Math.random() - 0.5) * 1;
+        this.radius = Math.random() * 3 + 2;
+        this.opacity = Math.random() * 0.8 + 0.4;
       }
       
       update(canvasWidth: number, canvasHeight: number) {
@@ -61,7 +61,7 @@ const CanvasBackground = () => {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         
-        // Theme-based colors
+        // Theme-based colors with higher opacity
         let color = 'rgba(6, 182, 212, '; // cyan-500
         if (settings.themeVariant === 'blue-professional') {
           color = 'rgba(59, 130, 246, '; // blue-500
@@ -71,11 +71,17 @@ const CanvasBackground = () => {
         
         ctx.fillStyle = color + this.opacity + ')';
         ctx.fill();
+        
+        // Add glow effect
+        ctx.shadowColor = color + '0.5)';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
       }
     }
 
-    // Create particles
-    const particleCount = Math.min(80, Math.floor((canvas.width * canvas.height) / 15000));
+    // Create more particles for better visibility
+    const particleCount = Math.min(120, Math.floor((canvas.width * canvas.height) / 10000));
     particlesRef.current = [];
     for (let i = 0; i < particleCount; i++) {
       particlesRef.current.push(new Particle(canvas.width, canvas.height));
@@ -85,7 +91,9 @@ const CanvasBackground = () => {
     function animate() {
       if (!running) return;
       
-      ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
+      // Clear with slight trail effect
+      ctx!.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
       
       // Update and draw particles
       particlesRef.current.forEach((particle: any) => {
@@ -100,12 +108,12 @@ const CanvasBackground = () => {
           const dy = particlesRef.current[i].y - particlesRef.current[j].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
           
-          if (distance < 120) {
+          if (distance < 150) {
             ctx!.beginPath();
             ctx!.moveTo(particlesRef.current[i].x, particlesRef.current[i].y);
             ctx!.lineTo(particlesRef.current[j].x, particlesRef.current[j].y);
             
-            const opacity = (1 - distance / 120) * 0.3;
+            const opacity = (1 - distance / 150) * 0.6;
             let strokeColor = 'rgba(6, 182, 212, '; // cyan-500
             if (settings.themeVariant === 'blue-professional') {
               strokeColor = 'rgba(59, 130, 246, '; // blue-500
@@ -114,7 +122,7 @@ const CanvasBackground = () => {
             }
             
             ctx!.strokeStyle = strokeColor + opacity + ')';
-            ctx!.lineWidth = 0.5;
+            ctx!.lineWidth = 1;
             ctx!.stroke();
           }
         }
@@ -123,7 +131,12 @@ const CanvasBackground = () => {
       animationRef.current = requestAnimationFrame(animate);
     }
     
-    animationRef.current = requestAnimationFrame(animate);
+    // Start animation after a small delay to ensure canvas is ready
+    setTimeout(() => {
+      if (running) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    }, 100);
 
     return () => {
       running = false;
