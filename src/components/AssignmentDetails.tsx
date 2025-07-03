@@ -4,8 +4,6 @@ import { Clock, Users, BookOpen, CheckCircle, Zap, Target } from 'lucide-react';
 const AssignmentDetails: React.FC = () => {
   return (
     <div className="bg-black border border-gray-800 rounded-xl p-8 mb-8 relative overflow-hidden">
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-purple-500/5 to-transparent opacity-50"></div>
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-purple-500 to-cyan-400"></div>
       
       <div className="relative">
