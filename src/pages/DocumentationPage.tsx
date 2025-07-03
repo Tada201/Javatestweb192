@@ -277,54 +277,76 @@ const DocumentationPage: React.FC = () => {
         <div className="sticky top-0 h-screen overflow-y-auto">
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-transparent to-gray-900/20 pointer-events-none"></div>
           
-          <div className="relative p-6">
+          <div className="relative p-6 space-y-6">
             {/* Version Selector */}
-            <div className="mb-6">
-              <select className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white font-mono text-sm focus:border-cyan-500/50 focus:outline-none">
+            <div className="relative">
+              <select className="w-full bg-gray-900/80 border border-gray-700/50 rounded-lg px-4 py-3 text-white font-mono text-sm focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 backdrop-blur-sm hover:border-gray-600/50">
                 <option>v3.0.0</option>
                 <option>v2.1.0</option>
                 <option>v2.0.0</option>
               </select>
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search documentation..."
+                className="w-full bg-gray-900/80 border border-gray-700/50 rounded-lg pl-10 pr-4 py-3 text-white text-sm focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 backdrop-blur-sm hover:border-gray-600/50 placeholder-gray-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
             
             {/* Navigation */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               {docSections.map((section) => (
                 <div key={section.id}>
                   {section.subsections ? (
                     <>
                       <button
                         onClick={() => toggleSection(section.id)}
-                        className="flex items-center justify-between w-full text-white font-medium py-3 px-4 hover:bg-gray-900/50 rounded-lg transition-all duration-300 group"
+                        className="flex items-center justify-between w-full text-white font-medium py-3 px-4 hover:bg-gray-900/50 rounded-lg transition-all duration-300 group relative overflow-hidden"
                       >
-                        <div className="flex items-center space-x-3">
-                          <div className="p-1 rounded-md group-hover:bg-gray-800/50 transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="flex items-center space-x-3 relative z-10">
+                          <div className="p-1.5 rounded-md group-hover:bg-gray-800/50 transition-all duration-300 group-hover:scale-110">
                             {section.icon}
                           </div>
-                          <span className="text-sm tracking-widest font-semibold">{section.title}</span>
+                          <span className="text-sm tracking-widest font-semibold group-hover:text-cyan-400 transition-colors duration-300">{section.title}</span>
                         </div>
-                        <div className="p-1 rounded-md group-hover:bg-gray-800/50 transition-all duration-300">
+                        <div className="p-1 rounded-md group-hover:bg-gray-800/50 transition-all duration-300 relative z-10">
                           {expandedSections.includes(section.id) ? 
-                            <ChevronDown className="w-4 h-4 transition-transform duration-300" /> : 
-                            <ChevronRight className="w-4 h-4 transition-transform duration-300" />
+                            <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:text-cyan-400" /> : 
+                            <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:text-cyan-400" />
                           }
                         </div>
                       </button>
                       
                       {expandedSections.includes(section.id) && (
-                        <div className="ml-4 space-y-1">
+                        <div className="ml-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
                           {section.subsections.map((subsection) => (
                             <button
                               key={subsection.id}
                               onClick={() => setActiveSection(subsection.id)}
-                              className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all duration-300 text-left ${
+                              className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all duration-300 text-left group relative overflow-hidden ${
                                 activeSection === subsection.id
-                                  ? 'bg-gradient-to-r from-cyan-500/10 to-purple-500/10 text-white border border-cyan-500/30'
+                                  ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-white border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
                                   : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
                               }`}
                             >
-                              <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
+                              <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                activeSection === subsection.id 
+                                  ? 'bg-cyan-400 animate-pulse' 
+                                  : 'bg-gray-600 group-hover:bg-cyan-400'
+                              }`}></div>
                               <span className="text-sm font-medium">{subsection.title}</span>
+                              {activeSection === subsection.id && (
+                                <div className="absolute right-3 w-1 h-6 bg-gradient-to-b from-cyan-400 to-purple-500 rounded-full"></div>
+                              )}
                             </button>
                           ))}
                         </div>
@@ -333,20 +355,47 @@ const DocumentationPage: React.FC = () => {
                   ) : (
                     <button
                       onClick={() => setActiveSection(section.id)}
-                      className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all duration-300 ${
+                      className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all duration-300 group relative overflow-hidden ${
                         activeSection === section.id
-                          ? 'bg-gradient-to-r from-cyan-500/10 to-purple-500/10 text-white border border-cyan-500/30'
+                          ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-white border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
                           : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
                       }`}
                     >
-                      <div className="p-1 rounded-md">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className={`p-1.5 rounded-md transition-all duration-300 relative z-10 ${
+                        activeSection === section.id 
+                          ? 'bg-cyan-500/20 text-cyan-400' 
+                          : 'group-hover:bg-gray-800/50 group-hover:scale-110'
+                      }`}>
                         {section.icon}
                       </div>
-                      <span className="text-sm font-medium">{section.title}</span>
+                      <span className="text-sm font-medium relative z-10">{section.title}</span>
+                      {activeSection === section.id && (
+                        <div className="absolute right-3 w-1 h-6 bg-gradient-to-b from-cyan-400 to-purple-500 rounded-full"></div>
+                      )}
                     </button>
                   )}
                 </div>
               ))}
+            </div>
+
+            {/* Quick Links */}
+            <div className="pt-6 border-t border-gray-800/50">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">QUICK LINKS</h3>
+              <div className="space-y-2">
+                <a href="#" className="flex items-center space-x-3 text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-sm group">
+                  <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Java Documentation</span>
+                </a>
+                <a href="#" className="flex items-center space-x-3 text-gray-400 hover:text-purple-400 transition-colors duration-300 text-sm group">
+                  <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Oracle Tutorials</span>
+                </a>
+                <a href="#" className="flex items-center space-x-3 text-gray-400 hover:text-green-400 transition-colors duration-300 text-sm group">
+                  <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Course Resources</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
