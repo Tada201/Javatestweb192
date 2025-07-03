@@ -1,15 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import AssignmentDetails from '../components/AssignmentDetails';
 import EmbedContainer from '../components/EmbedContainer';
 
 const CodePage: React.FC = () => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
     <div className="flex flex-1 h-full">
-      {/* Sidebar - Fixed within the page layout */}
-      <div className="w-80 bg-black border-r border-gray-800 flex-shrink-0">
+      {/* Sidebar - Collapsible */}
+      <div className={`bg-black border-r border-gray-800 flex-shrink-0 transition-all duration-300 ease-in-out ${
+        isSidebarCollapsed ? 'w-8' : 'w-80'
+      }`}>
         <div className="sticky top-0 h-screen overflow-y-auto">
-          <Sidebar />
+          <Sidebar 
+            isCollapsed={isSidebarCollapsed} 
+            onToggleCollapse={handleToggleSidebar}
+          />
         </div>
       </div>
       
@@ -17,9 +28,13 @@ const CodePage: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <AssignmentDetails />
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Code Editor Embed - Takes up 2 columns */}
-            <div className="lg:col-span-2">
+          <div className={`grid gap-8 transition-all duration-300 ${
+            isSidebarCollapsed ? 'grid-cols-1 lg:grid-cols-4' : 'grid-cols-1 lg:grid-cols-3'
+          }`}>
+            {/* Code Editor Embed - Takes up more space when sidebar is collapsed */}
+            <div className={`transition-all duration-300 ${
+              isSidebarCollapsed ? 'lg:col-span-3' : 'lg:col-span-2'
+            }`}>
               <EmbedContainer 
                 embedUrl="https://www.jdoodle.com/embed/v1/357eaa8f87a2b133"
                 title="HelloWorld Assignment"
@@ -62,7 +77,12 @@ const CodePage: React.FC = () => {
                         <span className="text-cyan-400">💡</span>
                         <span className="tracking-wide">PRO TIP</span>
                       </h4>
-                      <p className="text-gray-300 text-sm leading-relaxed">Use the code examples in the sidebar as reference. You can copy and paste them into the editor above.</p>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {isSidebarCollapsed 
+                          ? "Sidebar collapsed for more coding space! Click the menu icon to expand templates."
+                          : "Use the code examples in the sidebar as reference. You can copy and paste them into the editor above."
+                        }
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -131,6 +151,12 @@ const CodePage: React.FC = () => {
                   <div className="space-y-3">
                     <button className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-black py-3 px-4 rounded-lg transition-all duration-300 text-sm font-bold tracking-wide border border-cyan-500/50 hover:border-cyan-400">
                       LOAD HELLOWORLD TEMPLATE
+                    </button>
+                    <button 
+                      onClick={handleToggleSidebar}
+                      className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 px-4 rounded-lg transition-all duration-300 text-sm font-bold tracking-wide border border-purple-500/50 hover:border-purple-400"
+                    >
+                      {isSidebarCollapsed ? 'EXPAND SIDEBAR' : 'COLLAPSE SIDEBAR'}
                     </button>
                     <button className="w-full bg-gray-900/50 hover:bg-gray-800/50 text-white py-3 px-4 rounded-lg transition-all duration-300 text-sm font-bold tracking-wide border border-gray-700 hover:border-gray-600">
                       CLEAR EDITOR

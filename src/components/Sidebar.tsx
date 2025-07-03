@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, BookOpen, Code, Calculator, CreditCard, User, Copy, Check, Terminal, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, BookOpen, Code, Calculator, CreditCard, User, Copy, Check, Terminal, X, ChevronLeft, Menu } from 'lucide-react';
 
 interface CodeExample {
   name: string;
@@ -9,7 +9,12 @@ interface CodeExample {
   description: string;
 }
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggleCollapse }) => {
   const [isNavigationOpen, setIsNavigationOpen] = useState(true);
   const [isCodeExamplesOpen, setIsCodeExamplesOpen] = useState(true);
   const [selectedExample, setSelectedExample] = useState<CodeExample | null>(null);
@@ -148,93 +153,150 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <div className="w-80 bg-black border-r border-gray-800 h-full overflow-y-auto relative">
+      <div className={`bg-black border-r border-gray-800 h-full overflow-y-auto relative transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'w-8' : 'w-80'
+      }`}>
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-transparent to-gray-900/20 pointer-events-none"></div>
         
-        <div className="relative p-6">
-          {/* Navigation Section */}
-          <div className="mb-8">
-            <button
-              onClick={() => setIsNavigationOpen(!isNavigationOpen)}
-              className="flex items-center justify-between w-full text-white font-medium mb-4 hover:text-cyan-400 transition-all duration-300 group"
-            >
-              <span className="text-sm tracking-widest font-semibold">NAVIGATION</span>
-              <div className="p-1 rounded-md group-hover:bg-gray-800/50 transition-all duration-300">
-                {isNavigationOpen ? 
-                  <ChevronDown className="w-4 h-4 transition-transform duration-300" /> : 
-                  <ChevronRight className="w-4 h-4 transition-transform duration-300" />
-                }
-              </div>
-            </button>
-            
-            {isNavigationOpen && (
-              <div className="space-y-2">
-                <a href="#" className="flex items-center space-x-3 text-gray-400 hover:text-white hover:bg-gray-900/50 px-4 py-3 rounded-lg transition-all duration-300 group border border-transparent hover:border-gray-700">
-                  <BookOpen className="w-4 h-4 group-hover:text-cyan-400 transition-colors duration-300" />
-                  <span className="text-sm font-medium">Learning</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-cyan-400 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 px-4 py-3 rounded-lg border border-cyan-500/20 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <Code className="w-4 h-4 relative z-10" />
-                  <span className="text-sm font-medium relative z-10">Code Editor</span>
-                </a>
-              </div>
+        {/* Collapse Toggle Button */}
+        <div className="absolute top-4 right-2 z-20">
+          <button
+            onClick={onToggleCollapse}
+            className="p-1.5 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 rounded-md transition-all duration-300 group border border-transparent hover:border-gray-700"
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? (
+              <Menu className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+            ) : (
+              <ChevronLeft className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
             )}
+          </button>
+        </div>
+        
+        {/* Collapsed State */}
+        {isCollapsed && (
+          <div className="relative p-2 pt-12 space-y-3">
+            {/* Collapsed Navigation Icons */}
+            <div className="space-y-2">
+              <div className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 rounded-lg transition-all duration-300 cursor-pointer group" title="Learning">
+                <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+              </div>
+              <div className="p-2 text-cyan-400 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg border border-cyan-500/20 cursor-pointer group" title="Code Editor">
+                <Code className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+              </div>
+            </div>
+            
+            <div className="w-full h-px bg-gray-800"></div>
+            
+            {/* Collapsed Code Examples */}
+            <div className="space-y-2">
+              {codeExamples.map((example, index) => (
+                <button
+                  key={example.name}
+                  onClick={() => openCodeModal(example)}
+                  className={`p-2 rounded-lg transition-all duration-300 group w-full ${
+                    example.active
+                      ? 'bg-gradient-to-r from-cyan-500/10 to-purple-500/10 text-cyan-400 border border-cyan-500/30'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
+                  }`}
+                  title={example.name}
+                >
+                  <div className="group-hover:scale-110 transition-transform duration-300">
+                    {example.icon}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-
-          {/* Code Examples Section */}
-          <div>
-            <button
-              onClick={() => setIsCodeExamplesOpen(!isCodeExamplesOpen)}
-              className="flex items-center justify-between w-full text-white font-medium mb-4 hover:text-cyan-400 transition-all duration-300 group"
-            >
-              <span className="text-sm tracking-widest font-semibold">QUICK TEMPLATES</span>
-              <div className="flex items-center space-x-2">
-                <span className="bg-gradient-to-r from-cyan-500 to-purple-500 text-black px-2 py-1 rounded-md text-xs font-bold">
-                  {codeExamples.length}
-                </span>
+        )}
+        
+        {/* Expanded State */}
+        {!isCollapsed && (
+          <div className="relative p-6 pt-12">
+            {/* Navigation Section */}
+            <div className="mb-8">
+              <button
+                onClick={() => setIsNavigationOpen(!isNavigationOpen)}
+                className="flex items-center justify-between w-full text-white font-medium mb-4 hover:text-cyan-400 transition-all duration-300 group"
+              >
+                <span className="text-sm tracking-widest font-semibold">NAVIGATION</span>
                 <div className="p-1 rounded-md group-hover:bg-gray-800/50 transition-all duration-300">
-                  {isCodeExamplesOpen ? 
+                  {isNavigationOpen ? 
                     <ChevronDown className="w-4 h-4 transition-transform duration-300" /> : 
                     <ChevronRight className="w-4 h-4 transition-transform duration-300" />
                   }
                 </div>
-              </div>
-            </button>
-            
-            {isCodeExamplesOpen && (
-              <div className="space-y-2">
-                {codeExamples.map((example) => (
-                  <button
-                    key={example.name}
-                    onClick={() => openCodeModal(example)}
-                    className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-300 group border ${
-                      example.active
-                        ? 'bg-gradient-to-r from-cyan-500/10 to-purple-500/10 text-white border-cyan-500/30 shadow-lg shadow-cyan-500/10'
-                        : 'text-gray-400 hover:text-white hover:bg-gray-900/50 border-transparent hover:border-gray-700'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-1.5 rounded-md transition-all duration-300 ${
-                        example.active 
-                          ? 'bg-cyan-500/20 text-cyan-400' 
-                          : 'bg-gray-800/50 group-hover:bg-gray-700/50 group-hover:text-cyan-400'
-                      }`}>
-                        {example.icon}
+              </button>
+              
+              {isNavigationOpen && (
+                <div className="space-y-2">
+                  <a href="#" className="flex items-center space-x-3 text-gray-400 hover:text-white hover:bg-gray-900/50 px-4 py-3 rounded-lg transition-all duration-300 group border border-transparent hover:border-gray-700">
+                    <BookOpen className="w-4 h-4 group-hover:text-cyan-400 transition-colors duration-300" />
+                    <span className="text-sm font-medium">Learning</span>
+                  </a>
+                  <a href="#" className="flex items-center space-x-3 text-cyan-400 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 px-4 py-3 rounded-lg border border-cyan-500/20 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <Code className="w-4 h-4 relative z-10" />
+                    <span className="text-sm font-medium relative z-10">Code Editor</span>
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Code Examples Section */}
+            <div>
+              <button
+                onClick={() => setIsCodeExamplesOpen(!isCodeExamplesOpen)}
+                className="flex items-center justify-between w-full text-white font-medium mb-4 hover:text-cyan-400 transition-all duration-300 group"
+              >
+                <span className="text-sm tracking-widest font-semibold">QUICK TEMPLATES</span>
+                <div className="flex items-center space-x-2">
+                  <span className="bg-gradient-to-r from-cyan-500 to-purple-500 text-black px-2 py-1 rounded-md text-xs font-bold">
+                    {codeExamples.length}
+                  </span>
+                  <div className="p-1 rounded-md group-hover:bg-gray-800/50 transition-all duration-300">
+                    {isCodeExamplesOpen ? 
+                      <ChevronDown className="w-4 h-4 transition-transform duration-300" /> : 
+                      <ChevronRight className="w-4 h-4 transition-transform duration-300" />
+                    }
+                  </div>
+                </div>
+              </button>
+              
+              {isCodeExamplesOpen && (
+                <div className="space-y-2">
+                  {codeExamples.map((example) => (
+                    <button
+                      key={example.name}
+                      onClick={() => openCodeModal(example)}
+                      className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-300 group border ${
+                        example.active
+                          ? 'bg-gradient-to-r from-cyan-500/10 to-purple-500/10 text-white border-cyan-500/30 shadow-lg shadow-cyan-500/10'
+                          : 'text-gray-400 hover:text-white hover:bg-gray-900/50 border-transparent hover:border-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-1.5 rounded-md transition-all duration-300 ${
+                          example.active 
+                            ? 'bg-cyan-500/20 text-cyan-400' 
+                            : 'bg-gray-800/50 group-hover:bg-gray-700/50 group-hover:text-cyan-400'
+                        }`}>
+                          {example.icon}
+                        </div>
+                        <span className="text-sm font-medium">{example.name}</span>
                       </div>
-                      <span className="text-sm font-medium">{example.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-500 font-medium">VIEW</span>
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-gray-500 font-medium">VIEW</span>
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Code Example Modal */}
