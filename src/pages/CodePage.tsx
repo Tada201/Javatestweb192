@@ -14,7 +14,7 @@ const CodePage: React.FC = () => {
     <div className="flex flex-1 h-full">
       {/* Sidebar - Collapsible */}
       <div className={`bg-black border-r border-gray-800 flex-shrink-0 transition-all duration-300 ease-in-out ${
-        isSidebarCollapsed ? 'w-8' : 'w-80'
+        isSidebarCollapsed ? 'w-12' : 'w-80'
       }`}>
         <div className="sticky top-0 h-screen overflow-y-auto">
           <Sidebar 

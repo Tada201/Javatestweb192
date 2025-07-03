@@ -154,16 +154,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggleCollapse
   return (
     <>
       <div className={`bg-black border-r border-gray-800 h-full overflow-y-auto relative transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'w-8' : 'w-80'
+        isCollapsed ? 'w-12' : 'w-80'
       }`}>
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-transparent to-gray-900/20 pointer-events-none"></div>
         
         {/* Collapse Toggle Button */}
-        <div className="absolute top-4 right-2 z-20">
+        <div className={`absolute top-3 z-20 ${isCollapsed ? 'left-1/2 transform -translate-x-1/2' : 'right-3'}`}>
           <button
             onClick={onToggleCollapse}
-            className="p-1.5 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 rounded-md transition-all duration-300 group border border-transparent hover:border-gray-700"
+            className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 rounded-md transition-all duration-300 group border border-transparent hover:border-gray-700"
             title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
             {isCollapsed ? (
@@ -176,29 +176,29 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggleCollapse
         
         {/* Collapsed State */}
         {isCollapsed && (
-          <div className="relative p-2 pt-12 space-y-3">
+          <div className="relative pt-14 px-1 space-y-3 flex flex-col items-center">
             {/* Collapsed Navigation Icons */}
-            <div className="space-y-2">
-              <div className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 rounded-lg transition-all duration-300 cursor-pointer group" title="Learning">
+            <div className="space-y-3 flex flex-col items-center w-full">
+              <div className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 rounded-lg transition-all duration-300 cursor-pointer group w-8 h-8 flex items-center justify-center" title="Learning">
                 <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
               </div>
-              <div className="p-2 text-cyan-400 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg border border-cyan-500/20 cursor-pointer group" title="Code Editor">
+              <div className="p-2 text-cyan-400 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-lg border border-cyan-500/20 cursor-pointer group w-8 h-8 flex items-center justify-center" title="Code Editor">
                 <Code className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
               </div>
             </div>
             
-            <div className="w-full h-px bg-gray-800"></div>
+            <div className="w-6 h-px bg-gray-800 my-2"></div>
             
             {/* Collapsed Code Examples */}
-            <div className="space-y-2">
+            <div className="space-y-3 flex flex-col items-center w-full">
               {codeExamples.map((example, index) => (
                 <button
                   key={example.name}
                   onClick={() => openCodeModal(example)}
-                  className={`p-2 rounded-lg transition-all duration-300 group w-full ${
+                  className={`p-2 rounded-lg transition-all duration-300 group w-8 h-8 flex items-center justify-center ${
                     example.active
                       ? 'bg-gradient-to-r from-cyan-500/10 to-purple-500/10 text-cyan-400 border border-cyan-500/30'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-900/50 border border-transparent hover:border-gray-700'
                   }`}
                   title={example.name}
                 >
@@ -213,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggleCollapse
         
         {/* Expanded State */}
         {!isCollapsed && (
-          <div className="relative p-6 pt-12">
+          <div className="relative p-6 pt-14">
             {/* Navigation Section */}
             <div className="mb-8">
               <button
