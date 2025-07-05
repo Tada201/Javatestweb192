@@ -272,9 +272,9 @@ const DocumentationPage: React.FC = () => {
 
   return (
     <div className="flex flex-1 h-full">
-      {/* Sidebar - Fixed within the page layout */}
-      <div className="w-80 bg-black border-r border-gray-800 flex-shrink-0">
-        <div className="sticky top-0 h-screen overflow-y-auto">
+      {/* Sidebar - Fixed Position */}
+      <div className="fixed left-0 top-0 w-80 h-screen bg-black border-r border-gray-800 z-40 pt-20">
+        <div className="h-full overflow-y-auto">
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-transparent to-gray-900/20 pointer-events-none"></div>
           
           <div className="relative p-6 space-y-6">
@@ -378,8 +378,8 @@ const DocumentationPage: React.FC = () => {
         </div>
       </div>
       
-      {/* Main Content Area */}
-      <div className="flex-1 flex min-w-0">
+      {/* Main Content Area - Adjusted for fixed sidebar */}
+      <div className="flex-1 flex min-w-0 ml-80">
         {/* Content Area */}
         <div className="flex-1 p-8 overflow-y-auto">
           {/* Breadcrumb */}
