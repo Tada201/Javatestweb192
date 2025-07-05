@@ -273,7 +273,7 @@ const DocumentationPage: React.FC = () => {
   return (
     <div className="flex flex-1 h-full">
       {/* Sidebar - Fixed Position */}
-      <div className="fixed left-0 top-0 w-80 h-screen bg-black border-r border-gray-800 z-40 pt-20">
+      <div className="fixed left-0 top-20 w-80 h-[calc(100vh-5rem)] bg-black border-r border-gray-800 z-40">
         <div className="h-full overflow-y-auto">
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-transparent to-gray-900/20 pointer-events-none"></div>
           

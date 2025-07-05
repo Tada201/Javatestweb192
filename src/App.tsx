@@ -23,13 +23,16 @@ function App() {
           <div className="relative z-10 flex flex-col min-h-screen">
             <Header />
             
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/documentation" element={<DocumentationPage />} />
-              <Route path="/components" element={<ComponentsPage />} />
-              <Route path="/code" element={<CodePage />} />
-            </Routes>
+            {/* Main content area with top padding to account for fixed header */}
+            <div className="pt-20 flex-1">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/documentation" element={<DocumentationPage />} />
+                <Route path="/components" element={<ComponentsPage />} />
+                <Route path="/code" element={<CodePage />} />
+              </Routes>
+            </div>
           </div>
         </div>
       </Router>
