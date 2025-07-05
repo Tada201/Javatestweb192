@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Home, BookOpen, Code, Shield, Layers, Zap, Search, ExternalLink, FileText, Settings, HelpCircle, Database, Globe, Lock } from 'lucide-react';
+import { ChevronDown, ChevronRight, Home, BookOpen, Code, Shield, Layers, Zap, ExternalLink, FileText, Settings, HelpCircle, Database, Globe, Lock } from 'lucide-react';
 
 interface DocSection {
   id: string;
@@ -278,29 +278,6 @@ const DocumentationPage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-transparent to-gray-900/20 pointer-events-none"></div>
           
           <div className="relative p-6 space-y-6">
-            {/* Version Selector */}
-            <div className="relative">
-              <select className="w-full bg-gray-900/80 border border-gray-700/50 rounded-lg px-4 py-3 text-white font-mono text-sm focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 backdrop-blur-sm hover:border-gray-600/50">
-                <option>v3.0.0</option>
-                <option>v2.1.0</option>
-                <option>v2.0.0</option>
-              </select>
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-            </div>
-            
-            {/* Search Bar */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search documentation..."
-                className="w-full bg-gray-900/80 border border-gray-700/50 rounded-lg pl-10 pr-4 py-3 text-white text-sm focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 backdrop-blur-sm hover:border-gray-600/50 placeholder-gray-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-            </div>
-            
             {/* Navigation */}
             <div className="space-y-1">
               {docSections.map((section) => (
