@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Settings, Sun, Zap, Home, BookOpen, Code, Layers } from 'lucide-react';
+import { Search, Settings, Sun, Zap, Home, BookOpen, Code, Layers, FileText } from 'lucide-react';
 import SettingsHover from './SettingsHover';
 
 const Header: React.FC = () => {
@@ -90,6 +90,21 @@ const Header: React.FC = () => {
                 <span>Code</span>
                 <div className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-300 ${
                   isActive('/code') ? 'w-full' : 'w-0 group-hover:w-full'
+                }`}></div>
+              </Link>
+              
+              <Link 
+                to="/cheatsheet" 
+                className={`flex items-center space-x-2 transition-all duration-300 text-sm font-medium tracking-wide relative group ${
+                  isActive('/cheatsheet') 
+                    ? 'text-cyan-400' 
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>Cheatsheet</span>
+                <div className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-300 ${
+                  isActive('/cheatsheet') ? 'w-full' : 'w-0 group-hover:w-full'
                 }`}></div>
               </Link>
             </nav>
