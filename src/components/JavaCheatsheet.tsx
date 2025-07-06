@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -30,12 +30,11 @@ const JavaCheatsheet: React.FC = () => {
   const { settings } = useSettings();
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [isTocOpen, setIsTocOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
 
-  // Extract table of contents from markdown
-  useEffect(() => {
+  // Memoize TOC extraction to prevent recalculation on every render
+  const tocItems = useMemo(() => {
     const lines = cheatsheetContent.split('\n');
     const toc: TocItem[] = [];
     
@@ -54,8 +53,20 @@ const JavaCheatsheet: React.FC = () => {
       }
     });
     
-    setTocItems(toc);
+    return toc;
   }, []);
+
+  // Memoize filtered content to prevent recalculation
+  const filteredContent = useMemo(() => {
+    return searchTerm 
+      ? cheatsheetContent
+          .split('\n')
+          .filter(line => 
+            line.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .join('\n')
+      : cheatsheetContent;
+  }, [searchTerm]);
 
   // Handle scroll spy for active section
   useEffect(() => {
@@ -73,11 +84,11 @@ const JavaCheatsheet: React.FC = () => {
       setActiveSection(current);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleCopyCode = async (code: string) => {
+  const handleCopyCode = useCallback(async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
@@ -85,31 +96,165 @@ const JavaCheatsheet: React.FC = () => {
     } catch (err) {
       console.error('Failed to copy code:', err);
     }
-  };
+  }, []);
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = useCallback((id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setIsTocOpen(false);
     }
-  };
+  }, []);
 
-  const filteredContent = searchTerm 
-    ? cheatsheetContent
-        .split('\n')
-        .filter(line => 
-          line.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-        .join('\n')
-    : cheatsheetContent;
+  const toggleToc = useCallback(() => {
+    setIsTocOpen(prev => !prev);
+  }, []);
 
   const isDarkMode = settings.theme === 'dark';
 
+  // Memoize markdown components to prevent recreation on every render
+  const markdownComponents = useMemo(() => ({
+    h1: ({ children, ...props }: any) => {
+      const id = String(children).toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+      return (
+        <h1 id={id} className="text-3xl font-bold text-white mb-6 mt-12 first:mt-0 flex items-center space-x-3" {...props}>
+          <Zap className="w-6 h-6 text-cyan-400" />
+          <span>{children}</span>
+        </h1>
+      );
+    },
+    h2: ({ children, ...props }: any) => {
+      const id = String(children).toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+      return (
+        <h2 id={id} className="text-2xl font-bold text-white mb-4 mt-10 border-b border-gray-800 pb-2" {...props}>
+          {children}
+        </h2>
+      );
+    },
+    h3: ({ children, ...props }: any) => {
+      const id = String(children).toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+      return (
+        <h3 id={id} className="text-xl font-bold text-white mb-3 mt-8" {...props}>
+          {children}
+        </h3>
+      );
+    },
+    p: ({ children, ...props }: any) => (
+      <p className="text-gray-300 leading-relaxed mb-4" {...props}>
+        {children}
+      </p>
+    ),
+    ul: ({ children, ...props }: any) => (
+      <ul className="text-gray-300 mb-4 space-y-1" {...props}>
+        {children}
+      </ul>
+    ),
+    li: ({ children, ...props }: any) => (
+      <li className="flex items-start space-x-2" {...props}>
+        <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0"></div>
+        <span>{children}</span>
+      </li>
+    ),
+    code: ({ node, inline, className, children, ...props }: any) => {
+      const match = /language-(\w+)/.exec(className || '');
+      const codeString = String(children).replace(/\n$/, '');
+      
+      if (!inline && match) {
+        return (
+          <div className="relative group mb-6">
+            <div className="bg-gray-900/50 rounded-lg border border-gray-700/50 overflow-hidden">
+              {/* Code header */}
+              <div className="bg-gradient-to-r from-gray-900/80 to-gray-800/80 px-4 py-3 border-b border-gray-700/50 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-gray-400 font-mono">{match[1]}</span>
+                </div>
+                
+                <button
+                  onClick={() => handleCopyCode(codeString)}
+                  className="flex items-center space-x-2 text-gray-400 hover:text-cyan-400 transition-colors duration-300 opacity-0 group-hover:opacity-100"
+                >
+                  {copiedCode === codeString ? (
+                    <>
+                      <Check className="w-4 h-4 text-green-400" />
+                      <span className="text-xs font-medium text-green-400">COPIED</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span className="text-xs font-medium">COPY</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              {/* Code content */}
+              <div className="overflow-x-auto">
+                <SyntaxHighlighter
+                  style={isDarkMode ? oneDark : oneLight}
+                  language={match[1]}
+                  PreTag="div"
+                  customStyle={{
+                    margin: 0,
+                    padding: '1.5rem',
+                    background: 'transparent',
+                    fontSize: '0.875rem',
+                    lineHeight: '1.5'
+                  }}
+                  {...props}
+                >
+                  {codeString}
+                </SyntaxHighlighter>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
+      return (
+        <code 
+          className="bg-gray-800 text-cyan-400 px-2 py-1 rounded text-sm font-mono border border-gray-700" 
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    },
+    blockquote: ({ children, ...props }: any) => (
+      <blockquote 
+        className="border-l-4 border-cyan-500 bg-cyan-500/10 pl-4 py-2 my-4 text-gray-300 italic" 
+        {...props}
+      >
+        {children}
+      </blockquote>
+    ),
+    table: ({ children, ...props }: any) => (
+      <div className="overflow-x-auto mb-6">
+        <table className="w-full border-collapse border border-gray-700 rounded-lg overflow-hidden" {...props}>
+          {children}
+        </table>
+      </div>
+    ),
+    th: ({ children, ...props }: any) => (
+      <th className="bg-gray-800 text-white font-bold p-3 text-left border border-gray-700" {...props}>
+        {children}
+      </th>
+    ),
+    td: ({ children, ...props }: any) => (
+      <td className="bg-gray-900/30 text-gray-300 p-3 border border-gray-700" {...props}>
+        {children}
+      </td>
+    ),
+  }), [isDarkMode, copiedCode, handleCopyCode]);
+
   return (
     <div className="flex flex-1 h-full">
-      {/* Table of Contents Sidebar */}
-      <div className={`fixed left-0 top-20 w-80 h-[calc(100vh-5rem)] bg-black border-r border-gray-800 z-40 transform transition-transform duration-300 ${
+      {/* Table of Contents Sidebar - Optimized for smooth transitions */}
+      <div className={`fixed left-0 top-20 w-80 h-[calc(100vh-5rem)] bg-black border-r border-gray-800 z-40 transform transition-transform duration-200 ease-out will-change-transform ${
         isTocOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
         <div className="h-full overflow-y-auto">
@@ -129,7 +274,7 @@ const JavaCheatsheet: React.FC = () => {
               </div>
               
               <button
-                onClick={() => setIsTocOpen(false)}
+                onClick={toggleToc}
                 className="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg transition-all duration-300"
               >
                 <X className="w-4 h-4" />
@@ -188,19 +333,19 @@ const JavaCheatsheet: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${isTocOpen ? 'lg:ml-80' : 'lg:ml-80'}`}>
+      {/* Main Content - Optimized layout */}
+      <div className={`flex-1 transition-all duration-200 ease-out will-change-auto ${isTocOpen ? 'lg:ml-80' : 'lg:ml-80'}`}>
         {/* Mobile TOC Toggle */}
         <div className="lg:hidden fixed top-24 left-4 z-50">
           <button
-            onClick={() => setIsTocOpen(true)}
+            onClick={toggleToc}
             className="p-3 bg-black/80 backdrop-blur-sm border border-gray-700 rounded-lg text-gray-400 hover:text-cyan-400 hover:border-cyan-500/50 transition-all duration-300"
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content Area */}
+        {/* Content Area - Prevent layout shifts */}
         <div className="p-8 max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -240,148 +385,12 @@ const JavaCheatsheet: React.FC = () => {
             )}
           </div>
 
-          {/* Markdown Content */}
+          {/* Markdown Content - Memoized for performance */}
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
-              components={{
-                h1: ({ children, ...props }) => {
-                  const id = String(children).toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-                  return (
-                    <h1 id={id} className="text-3xl font-bold text-white mb-6 mt-12 first:mt-0 flex items-center space-x-3" {...props}>
-                      <Zap className="w-6 h-6 text-cyan-400" />
-                      <span>{children}</span>
-                    </h1>
-                  );
-                },
-                h2: ({ children, ...props }) => {
-                  const id = String(children).toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-                  return (
-                    <h2 id={id} className="text-2xl font-bold text-white mb-4 mt-10 border-b border-gray-800 pb-2" {...props}>
-                      {children}
-                    </h2>
-                  );
-                },
-                h3: ({ children, ...props }) => {
-                  const id = String(children).toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-                  return (
-                    <h3 id={id} className="text-xl font-bold text-white mb-3 mt-8" {...props}>
-                      {children}
-                    </h3>
-                  );
-                },
-                p: ({ children, ...props }) => (
-                  <p className="text-gray-300 leading-relaxed mb-4" {...props}>
-                    {children}
-                  </p>
-                ),
-                ul: ({ children, ...props }) => (
-                  <ul className="text-gray-300 mb-4 space-y-1" {...props}>
-                    {children}
-                  </ul>
-                ),
-                li: ({ children, ...props }) => (
-                  <li className="flex items-start space-x-2" {...props}>
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>{children}</span>
-                  </li>
-                ),
-                code: ({ node, inline, className, children, ...props }) => {
-                  const match = /language-(\w+)/.exec(className || '');
-                  const codeString = String(children).replace(/\n$/, '');
-                  
-                  if (!inline && match) {
-                    return (
-                      <div className="relative group mb-6">
-                        <div className="bg-gray-900/50 rounded-lg border border-gray-700/50 overflow-hidden">
-                          {/* Code header */}
-                          <div className="bg-gradient-to-r from-gray-900/80 to-gray-800/80 px-4 py-3 border-b border-gray-700/50 flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                                <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                              </div>
-                              <span className="text-sm text-gray-400 font-mono">{match[1]}</span>
-                            </div>
-                            
-                            <button
-                              onClick={() => handleCopyCode(codeString)}
-                              className="flex items-center space-x-2 text-gray-400 hover:text-cyan-400 transition-colors duration-300 opacity-0 group-hover:opacity-100"
-                            >
-                              {copiedCode === codeString ? (
-                                <>
-                                  <Check className="w-4 h-4 text-green-400" />
-                                  <span className="text-xs font-medium text-green-400">COPIED</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-4 h-4" />
-                                  <span className="text-xs font-medium">COPY</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-                          
-                          {/* Code content */}
-                          <div className="overflow-x-auto">
-                            <SyntaxHighlighter
-                              style={isDarkMode ? oneDark : oneLight}
-                              language={match[1]}
-                              PreTag="div"
-                              customStyle={{
-                                margin: 0,
-                                padding: '1.5rem',
-                                background: 'transparent',
-                                fontSize: '0.875rem',
-                                lineHeight: '1.5'
-                              }}
-                              {...props}
-                            >
-                              {codeString}
-                            </SyntaxHighlighter>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  
-                  return (
-                    <code 
-                      className="bg-gray-800 text-cyan-400 px-2 py-1 rounded text-sm font-mono border border-gray-700" 
-                      {...props}
-                    >
-                      {children}
-                    </code>
-                  );
-                },
-                blockquote: ({ children, ...props }) => (
-                  <blockquote 
-                    className="border-l-4 border-cyan-500 bg-cyan-500/10 pl-4 py-2 my-4 text-gray-300 italic" 
-                    {...props}
-                  >
-                    {children}
-                  </blockquote>
-                ),
-                table: ({ children, ...props }) => (
-                  <div className="overflow-x-auto mb-6">
-                    <table className="w-full border-collapse border border-gray-700 rounded-lg overflow-hidden" {...props}>
-                      {children}
-                    </table>
-                  </div>
-                ),
-                th: ({ children, ...props }) => (
-                  <th className="bg-gray-800 text-white font-bold p-3 text-left border border-gray-700" {...props}>
-                    {children}
-                  </th>
-                ),
-                td: ({ children, ...props }) => (
-                  <td className="bg-gray-900/30 text-gray-300 p-3 border border-gray-700" {...props}>
-                    {children}
-                  </td>
-                ),
-              }}
+              components={markdownComponents}
             >
               {filteredContent}
             </ReactMarkdown>
@@ -413,11 +422,11 @@ const JavaCheatsheet: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile overlay */}
+      {/* Mobile overlay - Optimized */}
       {isTocOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
-          onClick={() => setIsTocOpen(false)}
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-opacity duration-200"
+          onClick={toggleToc}
         />
       )}
     </div>
