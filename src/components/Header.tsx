@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Settings, Sun, Zap, Home, BookOpen, Code, Layers, FileText } from 'lucide-react';
+import { Search, Settings, Sun, Moon, Zap, Home, BookOpen, Code, Layers, FileText } from 'lucide-react';
 import SettingsHover from './SettingsHover';
 import SearchModal from './SearchModal';
 import { useSettings } from '../contexts/SettingsContext';
@@ -9,12 +9,16 @@ const Header: React.FC = () => {
   const location = useLocation();
   const [showSettings, setShowSettings] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
 
   const isActive = (path: string) => {
     return location.pathname === path || (path === '/home' && location.pathname === '/');
   };
 
+  const toggleTheme = () => {
+    const newTheme = settings.theme === 'light' ? 'dark' : 'light';
+    updateSettings({ theme: newTheme });
+  };
   // Dynamic theme classes
   const getHeaderClasses = () => {
     if (settings.theme === 'light') {
@@ -151,12 +155,20 @@ const Header: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <button className={`p-2 ${textClasses.secondary} ${textClasses.hover} hover:bg-gray-800/50 rounded-lg transition-all duration-200 group`}>
-              <Sun className="w-5 h-5 group-hover:rotate-45 transition-transform duration-200" />
+            <button 
+              onClick={toggleTheme}
+              className={`p-2 ${textClasses.secondary} ${textClasses.hover} hover:${settings.theme === 'light' ? 'bg-gray-100' : 'bg-gray-800/50'} rounded-lg transition-all duration-200 group`}
+              title={`Switch to ${settings.theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {settings.theme === 'light' ? (
+                <Moon className="w-5 h-5 group-hover:rotate-12 transition-transform duration-200" />
+              ) : (
+                <Sun className="w-5 h-5 group-hover:rotate-45 transition-transform duration-200" />
+              )}
             </button>
             <button 
               onClick={() => setShowSettings(true)}
-              className={`p-2 ${textClasses.secondary} ${textClasses.hover} hover:bg-gray-800/50 rounded-lg transition-all duration-200`}
+              className={`p-2 ${textClasses.secondary} ${textClasses.hover} hover:${settings.theme === 'light' ? 'bg-gray-100' : 'bg-gray-800/50'} rounded-lg transition-all duration-200`}
             >
               <Settings className="w-5 h-5" />
             </button>
